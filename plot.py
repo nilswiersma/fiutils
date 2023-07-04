@@ -57,7 +57,8 @@ def multi_scatter(df: pd.DataFrame, dims: Iterable[str], by: str='verdict', nsam
 #         return layout.cols(ncols)
 #     return layout
 
-def multi_heat2d(df: pd.DataFrame, dims: Iterable[str], bins: Union[Iterable[int], int]=10, ncols: int=2, *args, **kwargs) -> Union[hv.NdLayout, hv.HeatMap]:
+def multi_heat2d(df: pd.DataFrame, dims: Iterable[str], filter: Union[None, pd.Series]=None, bins: Union[Iterable[int], int]=10, ncols: int=2, *args, **kwargs) -> Union[hv.NdLayout, hv.HeatMap]:
+    # Perform any filtering after cutting for consistent bins
     df_binned = pd.DataFrame(columns=dims)
     
     try:
@@ -76,8 +77,11 @@ def multi_heat2d(df: pd.DataFrame, dims: Iterable[str], bins: Union[Iterable[int
     plts = []
     combs = list(combinations(dims, 2))
     for idx, (x, y) in enumerate(combs):
+        df_plot = df_binned
+        if not isinstance(filter, type(None)):
+            df_plot = df_binned[filter]
         plts.append(
-            df_binned.reset_index().groupby([y, x])['index'].count().unstack().hvplot.heatmap(*args, **kwargs).opts(xrotation=45, xlabel=x, ylabel=y))
+            df_plot.reset_index().groupby([y, x])['index'].count().unstack().hvplot.heatmap(*args, **kwargs).opts(xrotation=45, xlabel=x, ylabel=y))
     layout = reduce(operator.add, plts).opts(shared_axes=False)
     if len(combs) > 1:
         return layout.cols(ncols)
