@@ -14,6 +14,7 @@ CS = Pin(5, Pin.OUT)
 POWER = Pin(6, Pin.OUT, pull=Pin.PULL_DOWN)
 
 TRIGGER_OUT = Pin(7)
+TRIGGER2_OUT = Pin(8)
 
 spi = SPI(0, sck=SCK, mosi=MOSI, miso=MISO)
 spi.init(baudrate=20000) # 2MHz is normal max for rp2040
@@ -240,7 +241,8 @@ def fill_region(bl_dev: SPI, start, size, blksize):
     for addr in range(start, start+size, blksize):
         data = b''
         for x in range(addr, addr+blksize, 0x4):
-            data += struct.pack('>I', 0xbd75d47b)
+            # data += struct.pack('>I', 0xbd75d47b)
+            data += struct.pack('>I', 0xdd22dd22)
         resp = write_mem(bl_dev, addr, data)
         print('FILL', hex(addr), data, resp)
         if resp[1][-1:] != b'y':
