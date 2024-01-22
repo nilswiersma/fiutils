@@ -90,7 +90,7 @@ def multi_heat2d(df: pd.DataFrame, dims: Iterable[str], filter: Union[None, pd.S
         df_plot = df_binned
         if not isinstance(filter, type(None)):
             df_plot = df_binned[filter]
-        hist = df_plot.reset_index().groupby([y, x])['index'].count()
+        hist = df_plot.reset_index().groupby([y, x], observed=False)['index'].count()
         if vmin_to_zero:
             clim=(0, hist.max())
         else:
