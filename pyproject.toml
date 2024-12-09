@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools", "build", "setuptools_scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fiutils"
+description = "FI utilities"
+requires-python = "==3.*"
+readme = "docs/README.md"
+dynamic = ["dependencies", "version"]
+
+[tool.setuptools_scm]
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+

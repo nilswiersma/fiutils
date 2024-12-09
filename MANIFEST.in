@@ -1,0 +1,5 @@
+graft docs
+graft notebooks
+graft pico_upy
+prune */__pycache__
+

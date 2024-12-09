@@ -142,7 +142,7 @@ class Parameter():
         return json.dumps(self.to_dict())
 
 
-class Parameter2D():
+class Parameter2D(Parameter):
     def __init__(self, name, a_x, a_y, b_x, b_y, stops_x, stops_y):
         """TODO: step size instead of stop count possible as well"""
         self.name = name
