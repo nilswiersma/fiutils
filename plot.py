@@ -20,6 +20,8 @@ def summary_by(ldf: pd.DataFrame, by: str) -> pd.DataFrame:
 def multi_scatter(df: pd.DataFrame, dims: Iterable[str], by: str='verdict', nsample: int=None, ncols: int=2, *args, **kwargs) -> hv.NdLayout:
     if nsample:
         df_sample = sample_by(df, by, n=nsample)
+    else:
+        df_sample = df
     plts = []
     combs = list(combinations(dims, 2))
     for idx, (x, y) in enumerate(combs):
@@ -57,8 +59,7 @@ def multi_scatter(df: pd.DataFrame, dims: Iterable[str], by: str='verdict', nsam
 #         return layout.cols(ncols)
 #     return layout
 
-def multi_heat2d(df: pd.DataFrame, dims: Iterable[str], filter: Union[None, pd.Series]=None, bins: Union[Iterable[int], int]=10, ncols: int=2, *args, **kwargs) -> Union[hv.NdLayout, hv.HeatMap]:
-    # Perform any filtering after cutting for consistent bins
+def bin_cut(df: pd.DataFrame, dims: Iterable[str], bins: Union[Iterable[int], int]=10) -> pd.DataFrame:
     df_binned = pd.DataFrame(columns=dims)
     
     try:
@@ -71,8 +72,17 @@ def multi_heat2d(df: pd.DataFrame, dims: Iterable[str], filter: Union[None, pd.S
         it = zip(dims, [bins]*len(dims))
 
     for dim, bin in it:
+        df_binned[dim] = pd.cut(df[dim], bins=bin)
+        
+    return df_binned
+
+def multi_heat2d(df: pd.DataFrame, dims: Iterable[str], filter: Union[None, pd.Series]=None, bins: Union[Iterable[int], int]=10, vmin_to_zero: bool=False, ncols: int=2, shared_axes: bool=False, *args, **kwargs) -> Union[hv.NdLayout, hv.HeatMap]:
+    # Perform any filtering after cutting for consistent bins
+    df_binned = bin_cut(df, dims, bins=bins)
+    
+    for dim in dims:
         # Need to convert the labels to string, or we get exceptions further down the pipeline
-        df_binned[dim] = pd.cut(df[dim], bins=bin).apply(str)
+        df_binned[dim] = df_binned[dim].apply(str)
 
     plts = []
     combs = list(combinations(dims, 2))
@@ -80,9 +90,14 @@ def multi_heat2d(df: pd.DataFrame, dims: Iterable[str], filter: Union[None, pd.S
         df_plot = df_binned
         if not isinstance(filter, type(None)):
             df_plot = df_binned[filter]
+        hist = df_plot.reset_index().groupby([y, x])['index'].count()
+        if vmin_to_zero:
+            clim=(0, hist.max())
+        else:
+            clim=(hist.min(), hist.max()) 
         plts.append(
-            df_plot.reset_index().groupby([y, x])['index'].count().unstack().hvplot.heatmap(*args, **kwargs).opts(xrotation=45, xlabel=x, ylabel=y))
-    layout = reduce(operator.add, plts).opts(shared_axes=False)
+            hist.unstack().hvplot.heatmap(*args, clim=clim, **kwargs).opts(xrotation=45, xlabel=x, ylabel=y))
+    layout = reduce(operator.add, plts).opts(shared_axes=shared_axes)
     if len(combs) > 1:
         return layout.cols(ncols)
     return layout
