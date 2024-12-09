@@ -7,7 +7,7 @@ import operator
 import numpy as np
 
 """
-See main below for simple example of basic usage.
+See main below for simple example of basic usage. 
 
 ```
 params = [
