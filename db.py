@@ -40,8 +40,16 @@ def db_append_row(conn: sqlite3.Connection, table: str, data: "list[dict]"):
             cursor.execute(f"CREATE TABLE '{table}'({create_s})")
         else:
             pass
-    
-        f_insert(f"INSERT INTO '{table}' VALUES ({ ','.join(f':{col}' for col in keys) })", data)
+
+        while True:
+            try:
+                f_insert(f"INSERT INTO '{table}' VALUES ({ ','.join(f':{col}' for col in keys) })", data)
+            except sqlite3.OperationalError as e:
+                if str(e) == 'database is locked':
+                    sys.stderr.write('Database is locked, trying again in 1 second')
+                else:
+                    raise e
+            break
         cursor.connection.commit()
 
 def db_get_hist(conn: sqlite3.Connection, table: str) -> dict:
