@@ -2,6 +2,24 @@ Some python code for doing FI.
 
 # Recommended usage
 
-1. Make some kind of project folder (`mkdir project`).
-2. Clone this repo into that folder (`cd project`; `git clone ...`).
-3. Copy the notebook folder into the project folder (`cp -rv notebooks/* ./`).
+1. `pip install` this package:
+    ```
+    cd <workdir>
+    python -m venv .venv
+    source .venv/bin/activate
+    git clone <this>
+    pip install -e <this>
+    ```
+2. Copy the contents of notebook to a working dir:
+    ```
+    cd <workdir>
+    cp -rv <this>/notebooks/* ./
+    ```
+3. Try `python 000-simple-example.py`
+
+# Build package
+
+```
+python -m pip install setuptools_scm build tox
+python -m build
+```
