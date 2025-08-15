@@ -1,5 +1,5 @@
 import sys, os, logging
-from fiutils import get_run_id, setup_logger
+from fiutils.utils import get_run_id, setup_logger
 lm = setup_logger('main')
 __file__, timestamp = get_run_id('000-simple-template')
 try:
@@ -19,7 +19,7 @@ from pprint import pformat
 from contextlib import closing
 from types import SimpleNamespace
 
-from fiutils import setup_file_logger, setup_db, setup_params
+from fiutils.utils import setup_file_logger, setup_db, setup_params
 from fiutils.db import db_append_row
 from fiutils.params import Parameter, Parameter2D, pproduct, ptotal, pdump
 
@@ -69,7 +69,8 @@ with closing(sqlite3.connect(db_name)) as db:
                 do_reset = False
             
             if do_move and (prev_xy_scanner0 != p.xy_scanner0 or prev_xy_scanner1 != p.xy_scanner1):
-                lm.info(f'Moving to {p.xy_scanner0},{p.xy_scanner1}')
+                with progress.external_write_mode():
+                    lm.info(f'Moving to {p.xy_scanner0},{p.xy_scanner1}')
                 prev_xy_scanner0 = p.xy_scanner0
                 prev_xy_scanner1 = p.xy_scanner1
                 

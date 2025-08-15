@@ -4,8 +4,10 @@ import logging
 import os
 from pathlib import Path
 import sqlite3
+from tqdm import tqdm
 
 from .db import db_get_hist
+from .params import pdump, pproduct, ptotal
 
 class CustomFormatter(logging.Formatter):
     """Logging Formatter to add colors and count warning / errors"""
@@ -48,8 +50,8 @@ class FileFormatter(logging.Formatter):
 def setup_logger(name, file_name=None):
     handler = logging.StreamHandler()
     handler.setFormatter(CustomFormatter())
-    # if name in name in logging.Logger.manager.loggerDict:
-    #     return logging.getLogger(name)
+    if name in name in logging.Logger.manager.loggerDict:
+        return logging.getLogger(name)
     logger = logging.getLogger(name)
     logger.setLevel(logging.INFO)
     logger.addHandler(handler)
@@ -81,3 +83,15 @@ def setup_db(fname, timestamp):
         hist = db_get_hist(db, table_name)
         print(hist)
     return db_name, table_name, hist
+
+
+
+
+
+def setup_params(fname, timestamp, *params, **kwargs):
+    # Setup a progress bar for the provided parameters, and store the config to disk
+    path_params = Path('params') / fname
+    path_params.mkdir(parents=True, exist_ok=True)
+    pdump(params, path_params / f'{timestamp}.json')
+    progress = tqdm(enumerate(pproduct(params)), total=ptotal(params), mininterval=1, ncols=80)
+    return progress
