@@ -17,6 +17,8 @@ Some python code for doing FI.
     ```
 3. Try `python 000-simple-example.py`
 
+Alternatively you can install this git repo directly using `pip install git+https://github.com/nilswiersma/fiutils.git`
+
 # Build package
 
 ```
